@@ -1,70 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Bootstrap Example</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
-    />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-  </head>
-  <body>
-    <div class="container">
-      <h2>Image Converter</h2>
-      
-        <div id="selectedBanner"></div>
-        <div class="form-group">        
-          <label for="pwd">Upload an image </label>
-          <input
-            type="file"
-            class="form-control"
-            id="img"
-            placeholder="Enter password"
-            name="image"
-            accept=".jpg"
-          />
-        </div>
-        <button type="submit" href="opcv.py" class="btn btn-default">Submit</button>
-      </form>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Processing</title>
+    <style>
+        .image-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .image-container img {
+            max-width: 30%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>IMAGE TO SKETCH</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data" id="upload-form">
+        <input type="file" name="file" accept="image/jpeg">
+        <button type="submit">Upload</button>
+    </form>
+    <div class="image-container" id="image-container">
+        <img src="" alt="Original" id="original"><br>
+        <img src="" alt="Grayscale" id="grayscale"><br>
+        <img src="" alt="Inverted" id="inverted"><br>
+        <img src="" alt="Pencil Sketch" id="pencil-sketch"><br>
     </div>
-    <script
-      src="https://code.jquery.com/jquery-3.6.0.min.js"
-      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
-      crossorigin="anonymous"
-    ></script>
+
     <script>
-      var selDiv = "";
-      var storedFiles = [];
-      $(document).ready(function () {
-        $("#img").on("change", handleFileSelect);
-        selDiv = $("#selectedBanner");
-      });
-
-      function handleFileSelect(e) {
-        var files = e.target.files;
-        var filesArr = Array.prototype.slice.call(files);
-        filesArr.forEach(function (f) {
-          if (!f.type.match("image.*")) {
-            return;
-          }
-          storedFiles.push(f);
-
-          var reader = new FileReader();
-          reader.onload = function (e) {
-            var html =
-              '<img src="' +
-              e.target.result +
-              "\" data-file='" +
-              f.name +
-              "' class='avatar rounded lg' alt='Category Image' height='200px' width='200px'>";
-            selDiv.html(html);
-          };
-          reader.readAsDataURL(f);
+        document.getElementById('upload-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            if (!response.ok) {
+                console.error('Error uploading image');
+                return;
+            }
+            const data = await response.json();
+            document.getElementById('original').src = `data:image/jpeg;base64,${data.original}`;
+            document.getElementById('grayscale').src = `data:image/jpeg;base64,${data.grayscale}`;
+            document.getElementById('inverted').src = `data:image/jpeg;base64,${data.inverted}`;
+            document.getElementById('pencil-sketch').src = `data:image/jpeg;base64,${data.pencil_sketch}`;
         });
-      }
     </script>
-  </body>
+</body>
 </html>
